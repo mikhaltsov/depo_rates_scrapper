@@ -8,7 +8,7 @@ from sqlalchemy.dialects.mysql import DATE
 import pymysql
 
 pymysql.install_as_MySQLdb()
-engine = create_engine('mysql+pymysql://root:123456@localhost/scrpr_db')
+engine = create_engine('mysql+pymysql://root:your_password@localhost/scrpr_db')
 
 # engine = create_engine('sqlite:///scrpr.db')
 Base = declarative_base()
