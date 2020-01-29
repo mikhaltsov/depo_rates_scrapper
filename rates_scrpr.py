@@ -7,14 +7,15 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.mysql import DATE
 import pymysql
 
+#connect to MySQL db
 pymysql.install_as_MySQLdb()
-engine = create_engine('mysql+pymysql://root:your_password@localhost/scrpr_db')
+engine = create_engine('mysql+pymysql://your_user:your_password@localhost/some_db')
 
-# engine = create_engine('sqlite:///scrpr.db')
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 
 
+#declare db table
 class Rates(Base):
     __tablename__ = 'rates'
     id = Column(Integer, primary_key=True)
@@ -40,6 +41,7 @@ class Rates(Base):
 
 Base.metadata.create_all(engine)
 
+#list currencies and periods, that you want to be scrapped
 currencies_list = ['980', '840', '978']
 periods_list = ['30', '91', '182', '274', '365']
 
@@ -55,18 +57,21 @@ class RatesScrpr(object):
         self.currencies = currencies
         self.periods = periods
 
+    #generates url for individuals deposits rates
     def prostobank_params_generator(self):
         for currency in self.currencies:
             for period in self.periods:
                 url = f'https://www.prostobank.ua/depozity/any/{currency}/{period}/any/any/any/any/any/any/0/200000'
                 yield url, currency, period
 
+    #generates url for legal entities deposits rates
     def prostobiz_params_generator(self):
         for currency in self.currencies:
             for period in self.periods:
                 url = f'https://www.prostobiz.ua/business/deposit/any/{currency}/{period}/any/200000'
                 yield url, currency, period
 
+    #parses individuals deposits rates and saves then in db
     def prostobank_parser(self):
 
         for url, currency, period in self.prostobank_params_generator():
@@ -89,6 +94,7 @@ class RatesScrpr(object):
                     pass
             print('individuals -', currency, period, '- OK')
 
+    #parses legal entities deposits rates and saves then in db
     def prostobiz_parser(self):
 
         for url, currency, period in self.prostobiz_params_generator():
